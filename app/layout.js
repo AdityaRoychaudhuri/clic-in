@@ -47,7 +47,7 @@ export default function RootLayout({ children }) {
             attribute="class"
             defaultTheme="dark"
             enableSystem
-            disableTransitionOnChange
+            // disableTransitionOnChange
           >
             <Header/>
             <main className="min-h-screen">
