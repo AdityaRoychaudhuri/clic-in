@@ -132,3 +132,11 @@
     @apply font-mono;
   }
 }
+
+.gradient{
+  @apply bg-gradient-to-b from-green-600 to-emerald-500;
+}
+
+.gradient-title{
+  @apply bg-gradient-to-b from-green-600 to-green-900 font-bold text-transparent bg-clip-text pb-1 pr-2;
+}
