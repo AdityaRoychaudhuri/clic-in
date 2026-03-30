@@ -1,21 +1,39 @@
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { creditBenefits, testimonials } from '@/lib/data'
+import { Check, Stethoscope } from 'lucide-react'
+import Link from 'next/link'
 import React from 'react'
+import HeroSection from '@/components/HeroSection'
+import HowItWorks from '@/components/HowItWorks'
+import PricingSection from '@/components/PricingSection'
+import TestimonialSection from '@/components/TestimonialSection'
+import CTA from '@/components/CTA'
 
 const page = () => {
   return (
-    <div>
-        <div className='h-screen font-heading flex flex-col justify-center items-center gap-4'>
-            <h1 className='text-6xl font-mono'>
-                Hello
-            </h1>
-            <Button className='text-lg'>
-                Click me
-            </Button>
-            <p className='text-muted-foreground max-w-xl px-2'>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi quod numquam corrupti similique iure fugiat modi ea minima debitis corporis? Amet modi libero perferendis praesentium assumenda nisi neque. Iure, quaerat!
-                adasdaddawdwd
-            </p>
-        </div>
+    <div className='bg-background'>
+
+        {/* Hero Section */}
+        <HeroSection/>
+
+        {/* How it works */}
+
+        <HowItWorks/>
+
+        {/* Packages */}
+
+        <PricingSection/>
+
+        {/* Testimonials */}
+
+        <TestimonialSection/>
+
+        {/* CTA */}
+
+        <CTA/>
+
     </div>
     
   )
