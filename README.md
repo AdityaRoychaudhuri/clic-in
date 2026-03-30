@@ -17,7 +17,7 @@ A full-stack telemedicine platform built with Next.js that brings the clinic exp
 - **Frontend:** Next.js, React, Tailwind CSS
 - **Backend:** Next.js API Routes
 - **Authentication:** Clerk
-- **Video SDK:** Agora 
+- **Video SDK:** Vonage 
 - **Database:** Prisma
 
 ## ⚙️ Getting Started
