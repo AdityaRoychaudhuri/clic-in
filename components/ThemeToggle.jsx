@@ -18,7 +18,7 @@ const ThemeToggle = ({ className, iconSize = 20 }) => {
         variant='outline'
         size='icon'
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className={cn("relative rounded-full p-1 w-10 h-10 flex items-center justify-center mx-4", className)}
+        className={cn("relative rounded-full p-1 w-10 h-10 flex items-center justify-center", className)}
     >
         <Sun
             className={cn(
