@@ -56,7 +56,7 @@
   --background: oklch(0.97 0.01 250); /* cool white */
   --foreground: oklch(0.2 0.01 250);
 
-  --card: oklch(1 0 0);
+  --card: oklch(1 0 0 / 0.6);
   --card-foreground: oklch(0.2 0.01 250);
 
   --popover: oklch(1 0 0);
@@ -103,7 +103,7 @@
 .dark {
   --background: oklch(0.147 0.004 49.3);
   --foreground: oklch(0.986 0.002 67.8);
-  --card: oklch(0.214 0.009 43.1);
+  --card: oklch(0.214 0.009 43.1 / 50);
   --card-foreground: oklch(0.986 0.002 67.8);
   --popover: oklch(0.214 0.009 43.1);
   --popover-foreground: oklch(0.986 0.002 67.8);
@@ -152,4 +152,37 @@
 
 .gradient-title{
   @apply bg-gradient-to-b from-green-600 to-green-900 font-bold text-transparent bg-clip-text pb-1 pr-2;
+}
+
+.glass-card {
+  position: relative;
+  overflow: hidden;
+
+  background: var(--card);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border: 1px solid oklch(1 0 0 / 0.12);
+
+  box-shadow: 
+    0 4px 20px oklch(0 0 0 / 0.05);
+
+  border-radius: var(--radius);
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    oklch(1 0 0 / 0.12),
+    oklch(1 0 0 / 0.04) 40%,
+    transparent 70%
+  );
+
+  pointer-events: none;
 }
