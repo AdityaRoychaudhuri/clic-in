@@ -5,10 +5,15 @@ import { Show, SignInButton, UserButton } from "@clerk/nextjs"
 import { Button } from '@/components/ui/button'
 import ThemeToggle from './ThemeToggle'
 import { checkUser } from '@/lib/checkUser'
-import { Calendar, ShieldCheck, Stethoscope, User } from 'lucide-react'
+import { Calendar, CreditCard, ShieldCheck, Stethoscope, User } from 'lucide-react'
+import { checkCredits } from '@/actions/credits'
+import { Badge } from './ui/badge'
 
 const Header = async () => {
     const user = await checkUser();
+    if (user?.role === "PATIENT") {
+        await checkCredits(user);
+    }
 
   return (
     <header className='fixed top-0 w-full border-b bg-background/80 backdrop-blur-md z-10 supports-backdrop-filter:bg-background/60'>
@@ -38,7 +43,7 @@ const Header = async () => {
                     )}
 
                     {user?.role === "DOCTOR" && (
-                        <Link href="/doctor">
+                        <Link href="/doctors">
                             <Button className='cursor-pointer hidden md:inline-flex items-center' variant='outline'>
                                 <Stethoscope className='size-4'/>
                                 My Appointments
@@ -73,6 +78,31 @@ const Header = async () => {
                         </Link>
                     )}
                 </Show>
+
+               {(!user || user?.role !== "ADMIN") && (
+                <Link href={user?.role === "PATIENT" ? "/pricing" : "/doctor"}>
+                    <Button
+                        variant="outline"
+                        className="h-9 bg-primary/10 border-primary/30 dark:bg-primary/30 dark:border-primary/80 px-3 py-1 flex items-center gap-2"
+                    >
+                        <CreditCard className="size-4 text-green-700 dark:text-chart-1" />
+                        <span className="text-green-700 font-bold text-[14px] dark:text-chart-1">
+                            {user && user.role !== "ADMIN" ? (
+                                <>
+                                    {user.credit}{" "}
+                                    <span className="hidden md:inline">
+                                        {user?.role === "PATIENT"
+                                        ? "Credits"
+                                        : "Earned Credits"}
+                                    </span>
+                                </>
+                            ) : (
+                                <>Pricing</>
+                            )}
+                        </span>
+                    </Button>
+                </Link>
+            )}
 
                 <Show when="signed-out">
                     <SignInButton>
