@@ -43,7 +43,7 @@ const Header = async () => {
                     )}
 
                     {user?.role === "DOCTOR" && (
-                        <Link href="/doctors">
+                        <Link href="/doctor">
                             <Button className='cursor-pointer hidden md:inline-flex items-center' variant='outline'>
                                 <Stethoscope className='size-4'/>
                                 My Appointments
