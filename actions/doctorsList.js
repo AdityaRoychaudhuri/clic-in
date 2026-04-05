@@ -1,7 +1,6 @@
 "use server"
 
 import { db } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
 
 
 export async function getDoctorsBySpeciality(speciality) {
@@ -9,7 +8,7 @@ export async function getDoctorsBySpeciality(speciality) {
     const doctors = await db.user.findMany({
       where: {
         role: "DOCTOR",
-        speciality: speciality,
+        speciality: speciality.split("%20").join(" "),
         verificationStatus: "VERIFIED"
       },
       orderBy: {
