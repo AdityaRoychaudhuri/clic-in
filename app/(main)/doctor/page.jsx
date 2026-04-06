@@ -48,17 +48,19 @@ const page = async () => {
           </TabsTrigger>
         </TabsList>
         
+        <div className='md:col-span-3'>
+          <TabsContent value='appointments'>
+            <div>
+              Appointments
+            </div>
+          </TabsContent>
+          <TabsContent value='availability'>
+            <div className='md:col-span-3'>
+              <AvailabilitySlots slots={availableSlots.slots || []}/>
+            </div>
+          </TabsContent>
+        </div>
 
-        <TabsContent value='appointments'>
-          <div>
-            Appointments
-          </div>
-        </TabsContent>
-        <TabsContent value='availability'>
-          <div className='md:col-span-3'>
-            <AvailabilitySlots slots={availableSlots.slots || []}/>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   )
