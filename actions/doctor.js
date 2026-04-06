@@ -17,8 +17,10 @@ export async function setDoctorAvailability(formData) {
 
   try {
     const doctor = await db.user.findUnique({
-      clerkId: userId,
-      role: "DOCTOR"
+      where: {
+        clerkId: userId,
+        role: "DOCTOR"
+      }
     });
 
     if (!doctor) {
@@ -49,7 +51,7 @@ export async function setDoctorAvailability(formData) {
       const unavailableSlots = slots.filter((slot) => !slot.appointment);
 
       if (unavailableSlots.length > 0) {
-        await db.appointment.deleteMany({
+        await db.availability.deleteMany({
           where: {
             id: {
               in: unavailableSlots.map((slot) => slot.id)
