@@ -29,7 +29,7 @@ export async function getDoctorById(doctorId) {
       doctor
     }
   } catch (error) {
-    throw new Error("Cannot fetch doctor details");
+    throw new Error("Cannot fetch doctor details"+error.message);
   }
 }
 
@@ -71,7 +71,7 @@ export async function getAvailableTimeSlots(doctorId) {
 
     const availableSlotsByDay = {};
 
-    for (day of nextFourDays) {
+    for (const day of nextFourDays) {
       const dayString = format(day, "yyyy-MM-dd");
 
       availableSlotsByDay[dayString] = [];
@@ -97,7 +97,7 @@ export async function getAvailableTimeSlots(doctorId) {
       while (isBefore(addMinutes(currTime, 30), endTime) || +addMinutes(currTime, 30) === +endTime) {
         const next = addMinutes(currTime, 30);
 
-        if (isBefore(currTime, now)) {
+        if (isBefore(currTime, currDate)) {
           currTime = next;
           continue;
         }
@@ -224,35 +224,32 @@ export async function bookAppointment(formData) {
 
     const videoSessionId = await createVideoSession();
 
-    const result = await db.$transaction(async(tx) => {
-      const { success, error } = await deductCreditsForAppointments(
-        patient.id,
-        doctor.id
-      );
+    const { success, error } = await deductCreditsForAppointments(
+      patient.id,
+      doctor.id
+    );
 
-      if (!success || error) {
-        throw new Error(error || "Failed to deduct credits");
-      }
+    if (!success || error) {
+      throw new Error(error || "Failed to deduct credits");
+    }
 
-      const appointment = await tx.appointment.creat({
-        data: {
-          patientId: patient.id,
-          doctorId: doctor.id,
-          startTime,
-          endTime,
-          status: "SCHEDULED",
-          patientDescription: patientDesc,
-          videoSessionId,
-        },
-      });
-
-      return { appointment };
+    const appointment = await db.appointment.creat({
+      data: {
+        patientId: patient.id,
+        doctorId: doctor.id,
+        startTime,
+        endTime,
+        status: "SCHEDULED",
+        patientDescription: patientDesc,
+        videoSessionId,
+      },
     });
+
 
     revalidatePath("/appointments");
 
     return {
-      appointment: result.appointment,
+      appointment,
       success: true
     }
   } catch (error) {
