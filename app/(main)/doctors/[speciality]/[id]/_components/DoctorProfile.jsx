@@ -171,7 +171,7 @@ const DoctorProfile = ({ doctorData, doctorAppoitnments }) => {
               <CardContent>
                 {showBooking ? (
                   <>
-                    {true && (
+                    {!selectedSlot && (
                       <SlotPicker days={doctorAppoitnments} onSelectedSlot={handleSlotSelect}/>
                     )}
 

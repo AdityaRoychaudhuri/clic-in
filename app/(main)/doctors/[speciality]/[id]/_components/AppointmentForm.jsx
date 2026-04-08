@@ -1,10 +1,14 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 
 const AppointmentForm = ({ doctorId, slot, onBack, onComplete }) => {
+  const [description, setDescription] = useState("");
+
+
   return (
-    <div>
+    <form>
       
-    </div>
+    </form>
   )
 }
 
