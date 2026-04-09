@@ -80,7 +80,7 @@ export async function setDoctorAvailability(formData) {
   }
 }
 
-export async function getDoctorAvailability(params) {
+export async function getDoctorAvailability() {
   const { userId } = await auth();
 
   if (!userId) {
