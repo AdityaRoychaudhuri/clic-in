@@ -171,9 +171,9 @@ export async function bookAppointment(formData) {
 
     const doctor = await db.user.findUnique({
       where: {
-        userId: docId,
+        id: docId,
         role: "DOCTOR",
-        status: "VERIFIED",
+        verificationStatus: "VERIFIED",
       },
     });
 
@@ -185,9 +185,9 @@ export async function bookAppointment(formData) {
       throw new Error("Insufficient credits to book an appointment");
     }
 
-    const overLappingAppointments = await db.appointment.findUnique({
+    const overLappingAppointments = await db.appointment.findFirst({
       where: {
-        doctorId: docId,
+        id: docId,
         status: "SCHEDULED",
         OR: [
           {
@@ -233,7 +233,7 @@ export async function bookAppointment(formData) {
       throw new Error(error || "Failed to deduct credits");
     }
 
-    const appointment = await db.appointment.creat({
+    const appointment = await db.appointment.create({
       data: {
         patientId: patient.id,
         doctorId: doctor.id,
@@ -253,6 +253,7 @@ export async function bookAppointment(formData) {
       success: true
     }
   } catch (error) {
+    console.error("Error in booking appointment: "+error.message);
     throw new Error("Failed to book appointment");
   }
 }
