@@ -35,7 +35,10 @@ const DoctorProfile = ({ doctorData, doctorAppoitnments }) => {
 
 
   const handleSlotSelect = (slot) => {
+    console.log(slot);
     setSelectedSlot(slot);
+    console.log(!selectedSlot);
+    console.log(selectedSlot);
   }
 
   const handleBookingChange = () => {
@@ -179,7 +182,7 @@ const DoctorProfile = ({ doctorData, doctorAppoitnments }) => {
                       <AppointmentForm
                         doctorId={doctorData.id}
                         slot={selectedSlot}
-                        onBack={setSelectedSlot(null)}
+                        onBack={() => setSelectedSlot(null)}
                         onComplete={handleBookingComplete}
                       />
                     )}

@@ -17,9 +17,11 @@ const SlotPicker = ({ days, onSelectedSlot }) => {
 
   const handleSelect = (slot) => {
     setSelectedSlot(slot);
+    console.log(selectedSlot);
   };
 
   const confirmSelection = () => {
+    console.log(selectedSlot)
     if (selectedSlot) {
       onSelectedSlot(selectedSlot);
     }
