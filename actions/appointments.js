@@ -258,7 +258,7 @@ export async function bookAppointment(formData) {
   }
 }
 
-async function createVideoSession() {
+export async function createVideoSession() {
   try {
     const session = await vonage.video.createSession({
       mediaMode: "routed"
@@ -268,5 +268,87 @@ async function createVideoSession() {
   } catch (error) {
     throw new Error("Unable to create video session id: "+error.message);
     
+  }
+}
+
+export async function generateVideoToken(formData) {
+  // REQUIRES THE SESSION ID TOKEN ID AND APPOINTMENT ID
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        clerkId: userId
+      }
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const appointmentId = formData.get("appointmentId");
+
+    const appointment = await db.appointment.findUnique({
+      where: {
+        id: appointmentId,
+      },
+    });
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    if (appointment.patientId !== user.id && appointment.doctorId !== user.id) {
+      throw new Error("You are not authorised to join this call");
+    }
+
+    if (appointment.status !== "SCHEDULED") {
+      throw new Error("You need to schedule a meeting for video call");
+    }
+
+    const now = new Date();
+    const appointmentTime = new Date(appointment.startTime);
+    const timeDiff = (appointmentTime-now) / (1000*60);
+
+    if (timeDiff > 30) {
+      throw new Error("The call will be available 30minutes before the session");
+    }
+
+    const appointmentEndtime = new Date(appointment.endTime);
+    const expirationTime = Math.floor(appointmentEndtime.getTime() / 1000) + 60*60;
+
+    const userData = JSON.stringify({
+      name: user.name,
+      role: user.role,
+      userId: user.id
+    });
+
+    const token = vonage.video.generateClientToken(appointment.videoSessionId, {
+      role: "publisher",
+      expireTime: expirationTime,
+      data: userData
+    });
+
+    await db.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        videoSessionToken: token
+      },
+    });
+
+    return {
+      success: true,
+      videoSessionId: appointment.videoSessionId,
+      token: token
+    }
+  } catch (error) {
+    console.error("Error in generateVideoToken server action: "+error.message);
+    throw new Error("Error generating video token");
   }
 }
