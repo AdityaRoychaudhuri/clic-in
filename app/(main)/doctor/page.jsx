@@ -5,6 +5,7 @@ import { Calendar, Clock } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import React from 'react'
 import AvailabilitySlots from './_components/AvailabilitySlots';
+import AppointmentList from './_components/AppointmentList';
 
 const page = async () => {
   const user = await getUserInfo();
@@ -51,7 +52,7 @@ const page = async () => {
         <div className='md:col-span-3'>
           <TabsContent value='appointments'>
             <div>
-              Appointments
+              <AppointmentList appointmentList={doctorAppointments.appointments || []}/>
             </div>
           </TabsContent>
           <TabsContent value='availability'>
