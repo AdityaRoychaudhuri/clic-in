@@ -17,7 +17,7 @@ const AppointmentList = ({ appointmentList }) => {
         {appointmentList.length > 0 ? (
           <div className='space-y-4'>
             {appointmentList.map((appointment) => (
-              <AppointmentCard appointments={appointment} userRole={"doctor"}/>
+              <AppointmentCard key={appointment.id} appointments={appointment} userRole="DOCTOR"/>
             ))}
           </div>
         ) : (
