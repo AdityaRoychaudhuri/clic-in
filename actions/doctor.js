@@ -348,7 +348,7 @@ export async function markAppointmentCompleted(formData) {
     });
 
     if (!appointment) {
-      throw new Error("Appintment not found");
+      throw new Error("Appointment not found");
     }
 
     if (!appointment.status !== "SCHEDULED") {
