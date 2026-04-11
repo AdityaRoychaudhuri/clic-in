@@ -89,6 +89,29 @@ const AppointmentCard = ({ appointments, userRole }) => {
     }
   }
 
+  const isAppointmentActive = () => {
+    const now = new Date();
+    const appointmentStartTime = new Date(appointments.startTime);
+    const appointmentEndTime = new Date(appointments.endTime);
+
+    return (
+      (appointmentStartTime.getTime() - now.getTime() <= 30*60*1000 && now < appointmentStartTime) ||
+      (now >= appointmentStartTime && now <= appointmentEndTime)
+    )
+  }
+
+  const handleJoinVideoCall = async () => {
+    if (generateVideoLoading) {
+      return;
+    }
+
+    setAction("video");
+
+    const formData = new FormData();
+    formData.append("appointmentId", appointments.id);
+    await generateVideoFn(formData);
+  }
+
   useEffect(() => {
     if (markData?.success) {
       toast.success("Appointment marked as complete");
@@ -286,9 +309,18 @@ const AppointmentCard = ({ appointments, userRole }) => {
                 </div>
               )}
 
-              <div>
+              {appointments.status === "SCHEDULED" && (
+                <div className='space-y-2'>
+                  <h4>
+                    Video Consultation
+                  </h4>
 
-              </div>
+                  <Button>
+
+                  </Button>
+                </div>
+              ) }
+
             </div>
             
           </DialogContent>
