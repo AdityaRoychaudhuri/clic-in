@@ -55,7 +55,7 @@ const Header = async () => {
                     )}
                     
                     {user?.role === "PATIENT" && (
-                        <Link href="/doctors">
+                        <Link href="/appointments">
                             <Button className='cursor-pointer hidden md:inline-flex items-center' variant='outline'>
                                 <Calendar className='size-4'/>
                                 My Appointments
