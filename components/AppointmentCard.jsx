@@ -2,22 +2,25 @@
 import { generateVideoToken } from '@/actions/appointments';
 import { cancelAppointment, getDoctorNotes, markAppointmentCompleted } from '@/actions/doctor';
 import useFetch from '@/hooks/useFetch';
-import { Calendar, CircleCheck, Clock, Loader2, Stethoscope, User } from 'lucide-react';
+import { Calendar, CircleCheck, Clock, Edit, Loader2, Stethoscope, User, Video, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { Card, CardAction, CardContent, CardHeader,CardDescription, CardFooter, CardTitle } from './ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Card, CardAction, CardContent, CardHeader } from './ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Alert, AlertDescription } from './ui/alert';
+import { AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { Textarea } from './ui/textarea';
 
 const AppointmentCard = ({ appointments, userRole }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [action, setAction] = useState(null);
   const [notes, setNotes] = useState(appointments.notes || "");
-  console.log(appointments)
-  console.log(appointments.patient.email);
-  console.log(appointments.patient.name);
+
+  const router = useRouter();
 
   const {
     data: cancelAppointmentData,
@@ -112,6 +115,55 @@ const AppointmentCard = ({ appointments, userRole }) => {
     await generateVideoFn(formData);
   }
 
+  const handleSaveNotes = async () => {
+    if (getDoctorNotesLoading && userRole !== "DOCTOR") {
+      return
+    }
+
+    const formData = new FormData();
+
+    formData.append("appointmentId", appointments.id);
+    formData.append("notes", notes);
+
+    await getDoctorNotesFn(formData);
+  }
+
+  const handleCancelAppointment = async () => {
+    if (cancelAppointmentLoading) {
+      return;
+    }
+
+    if (window.confirm("Are you sure to cancel this appointment?  This action cannot be undone")) {
+      const formData = new FormData();
+
+      formData.append("appointmentId", appointments.id);
+
+      await cancelAppointmentFn(formData);
+    }
+  }
+
+  useEffect(() => {
+    if (generateVideoData?.success) {
+      router.push(`/video-call?sessionId=${generateVideoData.sessionId}&token=${generateVideoData.token}&appointmentId=${appointments.id}`);
+    }
+  }, [generateVideoData, appointments.id]);
+
+  useEffect(() => {
+    if (cancelAppointmentData?.success) {
+      toast.success("Appointment cancelled successfully");
+      setDialogOpen(false);
+    }
+  }, [cancelAppointmentData])
+  
+  
+  useEffect(() => {
+    if (getDoctorNotesData?.success) {
+      toast.success("Notes added successfully");
+      setAction(null);
+    }
+  }, [getDoctorNotesData])
+  
+
   useEffect(() => {
     if (markData?.success) {
       toast.success("Appointment marked as complete");
@@ -138,7 +190,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
                 )}
               </h3>
 
-              <p className='text-sm text-muted-foreground'>
+              <p className='text-sm text-muted-foreground self-start'>
                 { userRole === "DOCTOR" ? (
                   otherUserInfo.email
                 ) : (
@@ -164,7 +216,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
           </CardAction>
         </CardHeader>
         <CardContent className='py-0 space-y-2 flex flex-col md:flex-row md:items-center md:justify-between'>
-          <div className='px-4 text-sm text-muted-foreground'>
+          <div className='text-sm md:px-4 text-muted-foreground'>
             <div className='flex gap-1 items-center'>
               <Calendar className='size-4 text-green-700 dark:text-green-600 items-center'/>
               <p>
@@ -181,24 +233,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
 
           </div>
           <div className='flex justify-between md:justify-center gap-2 flex-wrap mt-4 md:mt-0'>
-            {canMarkCompleted() && (
-              <Button
-                size='sm'
-                onClick={handleMarkCompleted}
-              >
-                {markLoading ? (
-                  <>
-                    <Loader2 className='size-4 animate-spin'/>
-                    Marking...
-                  </>
-                ) : (
-                  <>
-                    <CircleCheck className='size-4'/>
-                    Completed
-                  </>
-                )}
-              </Button>
-            )}
+            
 
             <Button
               variant='outline'
@@ -311,18 +346,150 @@ const AppointmentCard = ({ appointments, userRole }) => {
 
               {appointments.status === "SCHEDULED" && (
                 <div className='space-y-2'>
-                  <h4>
+                  <h4 className='text-sm font-bold text-muted-foreground'>
                     Video Consultation
                   </h4>
-
-                  <Button>
-
+                  <Button
+                    className='w-full hover:bg-primary/75 transition-all cursor-pointer text-sm'
+                    disabled={isAppointmentActive()}
+                    onClick = {() => console.log("hello")}
+                  >
+                    {generateVideoLoading || action === "video" ? (
+                      <>
+                        <Loader2 className='size-4 animate-spin'/>
+                        Preparing video call
+                      </>
+                    ) : (
+                      <>
+                        <Video className='size-4'/>
+                        {isAppointmentActive() ? 
+                        "Join Video Call" :
+                        "Will be available 30 minutes before appointment"}
+                      </>
+                    )}
                   </Button>
                 </div>
-              ) }
+              )}
 
+              <div className='space-y-4'>
+                <div className='flex justify-between items-center'>
+                  <h4 className='text-sm font-bold text-muted-foreground'>
+                    Notes
+                  </h4>
+
+                  {userRole === "DOCTOR" && action!=="notes" && appointments.status !== "CANCELLED" && (
+                    <Button
+                      variant='ghost'
+                      className='h-7 hover:bg-primary/75 transition-all'
+                      size='sm'
+                      onClick={() => setAction("notes")}
+                    >
+                      <Edit className='h-3.5 w-3.5'/>
+                      {appointments.notes ? "Edit" : "Add"}
+                    </Button>
+                  )}
+                </div>
+
+                {userRole === "DOCTOR" && action === "notes" ? (
+                  <div>
+                    <Textarea
+                      onChange={(e) => setNotes(e.target.value)}
+                      value={notes}
+                      placeholder="Enter your clinical notes here..."
+                      className='min-h-25'
+                    />
+
+                    <div className='flex justify-between items-center mt-2'>
+                      <Button
+                        className=''
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        disabled={getDoctorNotesLoading}
+                        onClick={() => {
+                          setAction(null);
+                          setNotes(appointments.notes || "");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+
+                      <Button
+                        onClick={handleSaveNotes}
+                        size='sm'
+                        disabled={getDoctorNotesLoading}
+                      >
+                        {getDoctorNotesLoading ? (
+                          <>
+                            <Loader2 className='size-4 animate-spin'/>
+                            Saving
+                          </>
+                        ) : (
+                          "Save Notes"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : 
+
+                  <>
+                    {appointments.notes ? (
+                      <p className='text-black dark:text-white whitespace-pre-line'>
+                        {appointments.notes}
+                      </p>
+                    ) : (
+                      <Alert className='text-center text-muted-foregroun italic border border-none bg-muted/50'>
+                        <AlertDescription className='flex justify-center items-center text-sm gap-1 '>
+                          <AlertCircle className='size-4'/>
+                          Not notes avaialble
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </>
+                }
+              </div>
             </div>
-            
+            <DialogFooter className='flex flex-col-reverse sm:flex-row sm:justify-between'>
+              {appointments.status === "SCHEDULED" && (
+                <Button
+                  variant='destructive'
+                  onClick={handleCancelAppointment}
+                  disabled={cancelAppointmentLoading}
+                  size='sm'
+                >
+                  {cancelAppointmentLoading ? (
+                    <>
+                      <Loader2 className='size-4 animate-spin'/>
+                      Cancelling...
+                    </>
+                  ) : (
+                    <>
+                      <X className='size-4'/>
+                      Cancel
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {canMarkCompleted() && (
+                <Button
+                  size='sm'
+                  onClick={handleMarkCompleted}
+                >
+                  {markLoading ? (
+                    <>
+                      <Loader2 className='size-4 animate-spin'/>
+                      Marking...
+                    </>
+                  ) : (
+                    <>
+                      <CircleCheck className='size-4'/>
+                      Completed
+                    </>
+                  )}
+                </Button>
+              )}
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
