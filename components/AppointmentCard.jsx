@@ -144,7 +144,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
 
   useEffect(() => {
     if (generateVideoData?.success) {
-      router.push(`/video-call?sessionId=${generateVideoData.sessionId}&token=${generateVideoData.token}&appointmentId=${appointments.id}`);
+      router.push(`/video-call?sessionId=${generateVideoData.videoSessionId}&token=${generateVideoData.token}&appointmentId=${appointments.id}`);
     }
   }, [generateVideoData, appointments.id]);
 
@@ -351,8 +351,8 @@ const AppointmentCard = ({ appointments, userRole }) => {
                   </h4>
                   <Button
                     className='w-full hover:bg-primary/75 transition-all cursor-pointer text-sm'
-                    disabled={isAppointmentActive()}
-                    onClick = {() => console.log("hello")}
+                    disabled={!isAppointmentActive() || action === "video" || generateVideoLoading}
+                    onClick = {handleJoinVideoCall}
                   >
                     {generateVideoLoading || action === "video" ? (
                       <>
