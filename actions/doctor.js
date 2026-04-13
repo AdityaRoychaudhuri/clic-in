@@ -37,7 +37,7 @@ export async function setDoctorAvailability(formData) {
       throw new Error("Start and end time both are required");
     }
 
-    if (start >= end) {
+    if (startTime.getTime() >= endTime.getTime()) {
       throw new Error("Start should always be less than end time");
     }
 
@@ -198,11 +198,11 @@ export async function cancelAppointment(formData) {
       throw new Error("Appointment not found");
     }
 
-    if (appointment.doctorId !== user.id || appointment.patientId !== user.id) {
+    if (appointment.doctorId !== user.id && appointment.patientId !== user.id) {
       throw new Error("You are not authorized to cancel the appointment");
     }
 
-    const res = await db.$transactions(async(tx) => {
+    const res = await db.$transaction(async(tx) => {
       await tx.appointment.update({
         where: {
           id: appointmentId,
