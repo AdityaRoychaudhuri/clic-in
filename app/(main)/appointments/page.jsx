@@ -20,10 +20,10 @@ const page = async () => {
 
   return (
     <div>
-      <Card className=''>
+      <Card>
         <CardContent>
           {patientAppointments.length > 0  ? (
-            <div>
+            <div className='space-y-4'>
               {patientAppointments.map((appointment) => (
                 <AppointmentCard
                  appointments={appointment}
