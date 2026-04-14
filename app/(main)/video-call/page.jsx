@@ -5,7 +5,7 @@ const page = async ({ searchParams }) => {
   const { sessionId, token } = await searchParams;
   
   return (
-    <VideoCall sessionId token/>
+    <VideoCall sessionId={sessionId} token={token}/>
   )
 }
 
