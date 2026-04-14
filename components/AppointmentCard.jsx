@@ -109,7 +109,6 @@ const AppointmentCard = ({ appointments, userRole }) => {
     }
 
     setAction("video");
-
     const formData = new FormData();
     formData.append("appointmentId", appointments.id);
     await generateVideoFn(formData);
@@ -450,7 +449,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
               </div>
             </div>
             <DialogFooter className='flex flex-col-reverse sm:flex-row sm:justify-between'>
-              {appointments.status === "SCHEDULED" && (
+              {appointments.status === "SCHEDULED" || isAppointmentActive && (
                 <Button
                   variant='destructive'
                   onClick={handleCancelAppointment}
