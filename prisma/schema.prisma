@@ -37,6 +37,7 @@ model User{
   patientAppointments Appointment[] @relation("PatientAppointments")
   doctorAppointments Appointment[] @relation("DoctorAppointments")
   credits CreditTransaction[]
+  payouts Payout[]
 }
 
 model Appointment{
@@ -85,6 +86,31 @@ model CreditTransaction{
   type CreditType
   packageId String?
   createdAt DateTime @default(now())
+}
+
+model Payout{
+  id String @id @default(uuid())
+  doctorId String
+  doctor User @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  amount Float
+  credits Int
+  platformFee Float
+  netAmount Float
+  paypalEmail String
+  status PayoutType @default(PROCESSING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  processedAt DateTime?
+  processedBy String?
+
+  @@index([doctorId, status])
+  @@index([doctorId, createdAt])
+}
+
+enum PayoutType {
+  PROCESSED
+  PROCESSING
+  DENIED
 }
 
 enum CreditType {

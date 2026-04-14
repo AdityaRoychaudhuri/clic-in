@@ -37,3 +37,8 @@ export type Availability = Prisma.AvailabilityModel
  * 
  */
 export type CreditTransaction = Prisma.CreditTransactionModel
+/**
+ * Model Payout
+ * 
+ */
+export type Payout = Prisma.PayoutModel

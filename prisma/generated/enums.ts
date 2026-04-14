@@ -9,6 +9,15 @@
 * 🟢 You can import this file directly.
 */
 
+export const PayoutType = {
+  PROCESSED: 'PROCESSED',
+  PROCESSING: 'PROCESSING',
+  DENIED: 'DENIED'
+} as const
+
+export type PayoutType = (typeof PayoutType)[keyof typeof PayoutType]
+
+
 export const CreditType = {
   CREDIT_PURCHASE: 'CREDIT_PURCHASE',
   APPOINTMENT_DEDUCTION: 'APPOINTMENT_DEDUCTION',
