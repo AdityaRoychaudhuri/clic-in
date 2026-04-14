@@ -142,3 +142,38 @@ export async function updateDoctorStatus(formData) {
         throw new Error("Cannot updated doctor status to database");
     }
 }
+
+export async function getPendingPayouts(formData) {
+  const { isAdmin } = await verifyAdmin();
+
+  if (!verifyAdmin) {
+    throw new Error("Unauthorized as admin");
+  }
+
+  try {
+    const pendingPayouts = await db.payout.findMany({
+      where: {
+        status: "PROCESSING",
+      },
+      include: {
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            speciality: true,
+            credit: true
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return { pendingPayouts }
+  } catch (error) {
+    console.error("Error at pendingPayouts server action - admin.js"+error.message);
+    throw new Error("Cannot get pending doctor payout");
+  }
+}
