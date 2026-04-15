@@ -145,7 +145,7 @@ export async function getDoctorEarningDetails(formData) {
     const thisMonthAppointments = completedAppointments.filter((appointment) => new Date(appointment.createdAt) >= currMonth);
 
     const totalEarning = doctor.credit * DOCTOR_EARNING_PER_CREDIT;
-    const thisMonthEarning = thisMonthAppointments.lenhgth * 2 * DOCTOR_EARNING_PER_CREDIT;
+    const thisMonthEarning = thisMonthAppointments.length * 2 * DOCTOR_EARNING_PER_CREDIT;
     const averageMonthylyEarning = totalEarning > 0 ? totalEarning / Math.max(1, new Date().getMonth() + 1) : 0;
     
     const availableCredits = doctor.credit;
