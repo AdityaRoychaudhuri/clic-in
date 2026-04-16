@@ -36,6 +36,13 @@ const layout = async ({ children }) => {
                 <Users2 className='size-4 hidden md:inline'/>
                 <span>Doctors</span>
             </TabsTrigger>
+            <TabsTrigger 
+                value="doctors"
+                className='p-2 flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full'
+            >
+                <Users2 className='size-4 hidden md:inline'/>
+                <span>Doctors</span>
+            </TabsTrigger>
         </TabsList>
         <div className='md:col-span-3'>
             { children }
