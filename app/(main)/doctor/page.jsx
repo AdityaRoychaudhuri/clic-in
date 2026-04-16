@@ -7,6 +7,7 @@ import React from 'react'
 import AvailabilitySlots from './_components/AvailabilitySlots';
 import AppointmentList from './_components/AppointmentList';
 import AppointmentPayout from './_components/AppointmentPayout';
+import { getDoctorEarningDetails, getDoctorPayouts } from '@/actions/payout';
 
 const page = async () => {
   const user = await getUserInfo();
@@ -19,9 +20,11 @@ const page = async () => {
     redirect("/doctor/verification");
   }
 
-  const [availableSlots, doctorAppointments] = await Promise.all([
+  const [availableSlots, doctorAppointments, earningsData, payoutsData] = await Promise.all([
     getDoctorAvailability(),
     getDoctorAppointments(),
+    getDoctorEarningDetails(),
+    getDoctorPayouts()
   ]);
 
   return (
@@ -70,7 +73,7 @@ const page = async () => {
           </TabsContent>
           <TabsContent value='payouts'>
             <div>
-              <AppointmentPayout/>
+              <AppointmentPayout doctorPayouts={payoutsData.payouts} earningDetails={earningsData.earnings}/>
             </div>
           </TabsContent>
         </div>
