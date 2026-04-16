@@ -1,13 +1,16 @@
 import React from 'react'
 import { TabsContent } from '@/components/ui/tabs'
-import { getAllPendingDoctors, getAllVerifiedDoctors } from '@/actions/admin'
+import { approvePayout, getAllPendingDoctors, getAllVerifiedDoctors, getPendingPayouts } from '@/actions/admin'
 import PendingDoctors from './_components/PendingDoctors'
 import VerifiedDoctors from './_components/VerifiedDoctors'
+import PendingPayouts from './_components/PendingPayouts'
 
 const page = async () => {
-    const [pendingDoctorsData, verifiedDoctorsData] = await Promise.all([
+    const [pendingDoctorsData, verifiedDoctorsData, pendingPayouts, approvePayouts] = await Promise.all([
         getAllPendingDoctors(),
-        getAllVerifiedDoctors()
+        getAllVerifiedDoctors(),
+        getPendingPayouts(),
+        approvePayout()
     ])
 
   return (
@@ -17,6 +20,9 @@ const page = async () => {
       </TabsContent>
       <TabsContent value='doctors'>
         <VerifiedDoctors data={verifiedDoctorsData.doctors}/>
+      </TabsContent>
+      <TabsContent>
+        <PendingPayouts/>
       </TabsContent>
     </>
   )
