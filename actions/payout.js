@@ -93,7 +93,7 @@ export async function requestPayout(formData) {
       data: {
         doctorId: doctor.id,
         amount: totalAmount,
-        credits: credit,
+        credits: doctorCredit,
         platformFee,
         netAmount,
         paypalEmail,
