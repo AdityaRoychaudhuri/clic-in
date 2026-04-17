@@ -7,7 +7,6 @@ import { revalidatePath } from "next/cache";
 
 export async function verifyAdmin() {
   const { userId } = await auth();
-
   if (!userId) {
     console.error("User is not authenticated");
     return false;
@@ -15,10 +14,10 @@ export async function verifyAdmin() {
 
   try {
     const user = await db.user.findUnique({
-        where: {
-            clerkId: userId
-        }
-    })
+      where: {
+        clerkId: userId
+      }
+    });
 
     return user?.role === "ADMIN";
   } catch (error) {
@@ -29,6 +28,7 @@ export async function verifyAdmin() {
 
 export async function getAllPendingDoctors() {
   const isAdmin = await verifyAdmin();
+
   if (!isAdmin) {
     throw new Error("Unauthorised");
   }
@@ -143,8 +143,8 @@ export async function updateDoctorStatus(formData) {
   }
 }
 
-export async function getPendingPayouts(formData) {
-  const { isAdmin } = await verifyAdmin();
+export async function getPendingPayouts() {
+  const isAdmin = await verifyAdmin();
 
   if (!isAdmin) {
     throw new Error("Unauthorized as admin");
@@ -153,7 +153,9 @@ export async function getPendingPayouts(formData) {
   try {
     const pendingPayouts = await db.payout.findMany({
       where: {
-        status: "PROCESSING",
+        status: {
+          in: ["PROCESSING", "DENIED"],
+        }
       },
       include: {
         doctor: {
@@ -179,7 +181,7 @@ export async function getPendingPayouts(formData) {
 }
 
 export async function approvePayout(formData) {
-  const { isAdmin } = await verifyAdmin();
+  const isAdmin = await verifyAdmin();
 
   if (!isAdmin) {
     throw new Error("Unauthorized as admin");
@@ -190,7 +192,7 @@ export async function approvePayout(formData) {
 
     const admin = await db.user.findUnique({
       where: { 
-        clerkUserId: userId 
+        clerkId: userId 
       },
     });
 
@@ -235,16 +237,18 @@ export async function approvePayout(formData) {
         },
         data: {
           credit: {
-            decrement: payout.credit,
+            decrement: payout.credits,
           },
         },
       });
 
       await tx.creditTransaction.create({
         data: {
-          userId: payout.doctorId,
-          amount: -payout.credit,
-          type: "ADMIN_ADJUSTMENT"
+          amount: -payout.credits,
+          type: "ADMIN_ADJUSTMENT",
+          user: {
+            connect: { id: payout.doctor.id }
+          }
         },
       });
     });
