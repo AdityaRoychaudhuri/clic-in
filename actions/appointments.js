@@ -254,7 +254,7 @@ export async function bookAppointment(formData) {
     }
   } catch (error) {
     console.error("Error in booking appointment: "+error.message);
-    throw new Error("Failed to book appointment");
+    throw new Error(error.message);
   }
 }
 
