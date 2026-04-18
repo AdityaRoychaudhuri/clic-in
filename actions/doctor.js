@@ -3,10 +3,11 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache";
-import { id } from "zod/locales";
 
 
 // for setting and getting availability slots
+
+const APPOINTMENT_CREDIT_COST = 2;
 
 export async function setDoctorAvailability(formData) {
   const { userId } = await auth();
@@ -147,7 +148,7 @@ export async function getDoctorAppointments() {
         patient: true
       },
       orderBy: {
-        startTime: "asc"
+        startTime: "desc"
       },
     });
 
@@ -220,13 +221,13 @@ export async function cancelAppointment(formData) {
         },
       });
 
-      await tx.creditTransaction.create({
-        data: {
-          userId: appointment.doctorId,
-          amount: -2,
-          type: "APPOINTMENT_DEDUCTION",
-        },
-      });
+      // await tx.creditTransaction.create({
+      //   data: {
+      //     userId: appointment.doctorId,
+      //     amount: -2,
+      //     type: "APPOINTMENT_DEDUCTION",
+      //   },
+      // });
 
       await tx.user.update({
         where: {
@@ -239,16 +240,16 @@ export async function cancelAppointment(formData) {
         },
       });
 
-      await tx.user.update({
-        where: {
-          id: appointment.doctorId,
-        },
-        data: {
-          credit: {
-            decrement: 2,
-          },
-        },
-      });      
+      // await tx.user.update({
+      //   where: {
+      //     id: appointment.doctorId,
+      //   },
+      //   data: {
+      //     credit: {
+      //       decrement: 2,
+      //     },
+      //   },
+      // });      
     });
 
     if (user.role === "DOCTOR") {
@@ -347,11 +348,12 @@ export async function markAppointmentCompleted(formData) {
       },
     });
 
+    
     if (!appointment) {
       throw new Error("Appointment not found");
     }
-
-    if (!appointment.status !== "SCHEDULED") {
+    
+    if (appointment.status !== "SCHEDULED") {
       throw new Error("Only scheduled appointments can be marked as completed");
     }
 
@@ -362,19 +364,51 @@ export async function markAppointmentCompleted(formData) {
       throw new Error("Cannot mark appointment as completed before the scheduled end time");
     }
 
-    const updatedAppointment = await db.appointment.update({
-      where: {
-        id: appointment.id,
-      },
-      data: {
-        status: "COMPLETED"
-      },
-    });
+    const res = db.$transaction(async (tx) => {
+      const updatedAppointment = await tx.appointment.update({
+        where: {
+          id: appointment.id,
+        },
+        data: {
+          status: "COMPLETED",
+        },
+      });
+
+      await tx.creditTransaction.create({
+				data: {
+					userId: doctor.id,
+					amount: APPOINTMENT_CREDIT_COST,
+					type: "APPOINTMENT_DEDUCTION"
+				}
+			});
+
+      await tx.user.update({
+        where: {
+          id: doctor.id,
+        },
+        data: {
+          credit: {
+            increment: APPOINTMENT_CREDIT_COST
+          }
+        }
+      });
+
+      return updatedAppointment;
+    })
+
+    // const updatedAppointment = await db.appointment.update({
+    //   where: {
+    //     id: appointment.id,
+    //   },
+    //   data: {
+    //     status: "COMPLETED"
+    //   },
+    // });
 
     revalidatePath("/doctor");
     return {
       success: true,
-      appointment: updatedAppointment
+      appointment: res
     }
   } catch(error) {
     console.error("Error in markAppointmentCompleted: "+error.message);
