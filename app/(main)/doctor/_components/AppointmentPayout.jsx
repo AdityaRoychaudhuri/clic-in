@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useFetch from '@/hooks/useFetch';
@@ -17,8 +17,6 @@ import { toast } from 'sonner';
 const AppointmentPayout = ({ earningDetails = [], doctorPayouts }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [paypalEmail, setPaypalEmail] = useState("");
-
-  console.log(doctorPayouts);
 
   const {
     totalEarning = 0,
@@ -140,7 +138,7 @@ const AppointmentPayout = ({ earningDetails = [], doctorPayouts }) => {
                 </h3>
 
                 <p className='text-3xl font-bold text-black dark:text-white'>
-                  ${averageMonthylyEarning}
+                  ${averageMonthylyEarning.toFixed(2)}
                 </p>
 
                 <p className='text-muted-foreground text-xs'>
@@ -305,10 +303,10 @@ const AppointmentPayout = ({ earningDetails = [], doctorPayouts }) => {
                 Payout History
               </h3>
 
-              <div>
+              <div className='space-y-2'>
                 {doctorPayouts.slice(0,5).map((payout) => (
                   <Card
-                    id={payout.id}
+                    key={payout.id}
                     className='bg-background/40'
                   >
                     <CardHeader>
