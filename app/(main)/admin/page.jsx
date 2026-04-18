@@ -9,8 +9,7 @@ const page = async () => {
     const [pendingDoctorsData, verifiedDoctorsData, pendingPayouts, approvePayouts] = await Promise.all([
         getAllPendingDoctors(),
         getAllVerifiedDoctors(),
-        getPendingPayouts(),
-        approvePayout()
+        getPendingPayouts()
     ])
 
   return (
@@ -21,8 +20,8 @@ const page = async () => {
       <TabsContent value='doctors'>
         <VerifiedDoctors data={verifiedDoctorsData.doctors}/>
       </TabsContent>
-      <TabsContent>
-        <PendingPayouts/>
+      <TabsContent value='payout'>
+        <PendingPayouts pendingPayouts={pendingPayouts.pendingPayouts}/>
       </TabsContent>
     </>
   )
