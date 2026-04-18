@@ -125,13 +125,13 @@ export async function deductCreditsForAppointments(patientId, doctorId) {
 				}
 			});
 
-			await tx.creditTransaction.create({
-				data: {
-					userId: doctor.id,
-					amount: APPOINTMENT_CREDIT_COST,
-					type: "APPOINTMENT_DEDUCTION"
-				}
-			});
+			// await tx.creditTransaction.create({
+			// 	data: {
+			// 		userId: doctor.id,
+			// 		amount: APPOINTMENT_CREDIT_COST,
+			// 		type: "APPOINTMENT_DEDUCTION"
+			// 	}
+			// });
 
 			const updatedPatient = await tx.user.update({
 				where: {
@@ -144,16 +144,16 @@ export async function deductCreditsForAppointments(patientId, doctorId) {
 				},
 			});
 
-			const updatedDoctor = await tx.user.update({
-				where: {
-					id: doctor.id,
-				},
-				data: {
-					credit: {
-						increment: APPOINTMENT_CREDIT_COST
-					}
-				}
-			});
+			// const updatedDoctor = await tx.user.update({
+			// 	where: {
+			// 		id: doctor.id,
+			// 	},
+			// 	data: {
+			// 		credit: {
+			// 			increment: APPOINTMENT_CREDIT_COST
+			// 		}
+			// 	}
+			// });
 
 			return updatedPatient;
 		});
