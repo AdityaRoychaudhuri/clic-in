@@ -55,7 +55,6 @@ const AppointmentCard = ({ appointments, userRole }) => {
   } = useFetch(generateVideoToken)
 
   const otherUserInfo = userRole === "DOCTOR" ? appointments.patient : appointments.doctor;
-  console.log(otherUserInfo);
 
   const otherPartyLabel = userRole === "DOCTOR" ? "Patient" : "Doctor";
   const otherPartyIcon = userRole === "DOCTOR" ? <User className=''/> : <Stethoscope/>;
@@ -98,9 +97,16 @@ const AppointmentCard = ({ appointments, userRole }) => {
     const appointmentEndTime = new Date(appointments.endTime);
 
     return (
-      (appointmentStartTime.getTime() - now.getTime() <= 30*60*1000 && now < appointmentStartTime) ||
+      (appointmentStartTime.getTime() - now.getTime() <= 15*60*1000 && now < appointmentStartTime) ||
       (now >= appointmentStartTime && now <= appointmentEndTime)
     )
+  }
+
+  const isCancellable = () => {
+    const now = new Date();
+    const appointmentStartTime = new Date(appointments.startTime);
+
+    return now.getTime() < appointmentStartTime.getTime();
   }
 
   const handleJoinVideoCall = async () => {
@@ -363,7 +369,7 @@ const AppointmentCard = ({ appointments, userRole }) => {
                         <Video className='size-4'/>
                         {isAppointmentActive() ? 
                         "Join Video Call" :
-                        "Will be available 30 minutes before appointment"}
+                        "Will be available 15 minutes before appointment"}
                       </>
                     )}
                   </Button>
@@ -449,12 +455,13 @@ const AppointmentCard = ({ appointments, userRole }) => {
               </div>
             </div>
             <DialogFooter className='flex flex-col-reverse sm:flex-row sm:justify-between'>
-              {appointments.status === "SCHEDULED" || isAppointmentActive && (
+              {appointments.status === "SCHEDULED" && isCancellable() && (
                 <Button
                   variant='destructive'
                   onClick={handleCancelAppointment}
                   disabled={cancelAppointmentLoading}
                   size='sm'
+                  className={`${isAppointmentActive() ? "w-fit" : "w-full"}`}
                 >
                   {cancelAppointmentLoading ? (
                     <>
@@ -470,10 +477,12 @@ const AppointmentCard = ({ appointments, userRole }) => {
                 </Button>
               )}
 
-              {canMarkCompleted() && (
+              {(canMarkCompleted() || isAppointmentActive()) && (
                 <Button
                   size='sm'
                   onClick={handleMarkCompleted}
+                  disabled={markLoading}
+                  className={`${(appointments.status === "SCHEDULED" && isCancellable()) ? "w-fit" : "w-full"}`}
                 >
                   {markLoading ? (
                     <>
