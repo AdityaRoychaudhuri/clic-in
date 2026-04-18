@@ -9,7 +9,7 @@ const CREDIT_VALUE = 10;
 const PLATFORM_FEE_PER_CREDIT = 2;
 const DOCTOR_EARNING_PER_CREDIT = 8;
 
-export async function getDoctorPayouts(params) {
+export async function getDoctorPayouts() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -112,7 +112,7 @@ export async function requestPayout(formData) {
   }
 }
 
-export async function getDoctorEarningDetails(formData) {
+export async function getDoctorEarningDetails() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -138,14 +138,28 @@ export async function getDoctorEarningDetails(formData) {
       },
     });
 
+    const completedPayouts = await db.payout.findMany({
+      where: {
+        doctorId: doctor.id,
+        status: "PROCESSED"
+      }
+    })
+
     const currMonth = new Date();
     currMonth.setDate(1);
     currMonth.setHours(0,0,0,0);
 
-    const thisMonthAppointments = completedAppointments.filter((appointment) => new Date(appointment.createdAt) >= currMonth);
+    const thisMonthPayouts = completedPayouts.filter((payout) => new Date(payout.createdAt) >= currMonth);
+    const totalPayout = completedPayouts.reduce(
+      (sum, payout) => sum + payout.netAmount, 0
+    );
 
-    const totalEarning = doctor.credit * DOCTOR_EARNING_PER_CREDIT;
-    const thisMonthEarning = thisMonthAppointments.length * 2 * DOCTOR_EARNING_PER_CREDIT;
+    const thisMonthTotalPayouts = thisMonthPayouts.reduce(
+      (sum, payout) => sum + payout.netAmount, 0
+    );
+    
+    const totalEarning = totalPayout;
+    const thisMonthEarning = thisMonthTotalPayouts;
     const averageMonthylyEarning = totalEarning > 0 ? totalEarning / Math.max(1, new Date().getMonth() + 1) : 0;
     
     const availableCredits = doctor.credit;
