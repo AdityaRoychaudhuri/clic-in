@@ -35,10 +35,7 @@ const DoctorProfile = ({ doctorData, doctorAppoitnments }) => {
 
 
   const handleSlotSelect = (slot) => {
-    console.log(slot);
     setSelectedSlot(slot);
-    console.log(!selectedSlot);
-    console.log(selectedSlot);
   }
 
   const handleBookingChange = () => {
