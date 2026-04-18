@@ -103,7 +103,6 @@ const AvailabilitySlots = ({ slots }) => {
               {slots.length != 0 ? (
                 <div>
                   {slots.map((slot) => {
-                    console.log(slot)
                     return (
                       <div key={slot.id} className='flex items-center gap-2 py-4 p-3 rounded-md border border-accent mb-4 glass-card'>
                         <div className='bg-primary rounded-full p-2 '>
