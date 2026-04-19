@@ -5,7 +5,7 @@ import useFetch from '@/hooks/useFetch';
 import { Calendar, CircleCheck, Clock, Edit, Loader2, Stethoscope, User, Video, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { Card, CardAction, CardContent, CardHeader } from './ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -14,42 +14,38 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Textarea } from './ui/textarea';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 
 const AppointmentCard = ({ appointments, userRole }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [action, setAction] = useState(null);
   const [notes, setNotes] = useState(appointments.notes || "");
+  const [confirmAppointmentDialog, setConfirmAppointmentDialog] = useState(false);
+  const [cancelAppointmentDialog, setCancelAppointmentDialog] = useState(false);
 
   const router = useRouter();
 
   const {
     data: cancelAppointmentData,
     loading: cancelAppointmentLoading,
-    error: cancelAppointmentError,
     fetchData: cancelAppointmentFn,
-    setData: cancelAppointmentSetData,
   } = useFetch(cancelAppointment);
 
   const {
     data: getDoctorNotesData,
     loading: getDoctorNotesLoading,
-    error: getDoctorNotesError,
     fetchData: getDoctorNotesFn,
-    setData: getDoctorNotesSetData
   } = useFetch(getDoctorNotes);
 
   const {
     data: markData,
     loading: markLoading,
-    error: markError,
     fetchData: markFn,
-    setData: markSetData
   } = useFetch(markAppointmentCompleted)
 
   const {
     data: generateVideoData,
     loading: generateVideoLoading,
-    error: generateVideoError,
     fetchData: generateVideoFn,
     setData: generateVideoSetData
   } = useFetch(generateVideoToken)
@@ -83,12 +79,9 @@ const AppointmentCard = ({ appointments, userRole }) => {
     if (markLoading) {
       return;
     }
-
-    if (window.confirm("Are you sure? This action cannot be undone")) {
-      const formData = new FormData();
-      formData.append("appointmentId", appointments.id);
-      await markFn(formData);
-    }
+    const formData = new FormData();
+    formData.append("appointmentId", appointments.id);
+    await markFn(formData);
   }
 
   const isAppointmentActive = () => {
@@ -137,14 +130,11 @@ const AppointmentCard = ({ appointments, userRole }) => {
     if (cancelAppointmentLoading) {
       return;
     }
+    const formData = new FormData();
 
-    if (window.confirm("Are you sure to cancel this appointment?  This action cannot be undone")) {
-      const formData = new FormData();
+    formData.append("appointmentId", appointments.id);
 
-      formData.append("appointmentId", appointments.id);
-
-      await cancelAppointmentFn(formData);
-    }
+    await cancelAppointmentFn(formData);
   }
 
   useEffect(() => {
@@ -458,10 +448,10 @@ const AppointmentCard = ({ appointments, userRole }) => {
               {appointments.status === "SCHEDULED" && isCancellable() && (
                 <Button
                   variant='destructive'
-                  onClick={handleCancelAppointment}
+                  onClick={() => setCancelAppointmentDialog(true)}
                   disabled={cancelAppointmentLoading}
                   size='sm'
-                  className={`${isAppointmentActive() ? "w-fit" : "w-full"}`}
+                  className={`${(isAppointmentActive() && userRole === "DOCTOR") ? "w-fit" : "w-full"}`}
                 >
                   {cancelAppointmentLoading ? (
                     <>
@@ -477,10 +467,10 @@ const AppointmentCard = ({ appointments, userRole }) => {
                 </Button>
               )}
 
-              {(canMarkCompleted() || isAppointmentActive()) && (
+              {((canMarkCompleted() || isAppointmentActive()) && userRole === "DOCTOR" ) && (
                 <Button
                   size='sm'
-                  onClick={handleMarkCompleted}
+                  onClick={() => setConfirmAppointmentDialog(true)}
                   disabled={markLoading}
                   className={`${(appointments.status === "SCHEDULED" && isCancellable()) ? "w-fit" : "w-full"}`}
                 >
@@ -500,6 +490,47 @@ const AppointmentCard = ({ appointments, userRole }) => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {confirmAppointmentDialog && (
+        <AlertDialog open={confirmAppointmentDialog} onOpenChange={setConfirmAppointmentDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will mark the appointment as completed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <div className='w-full flex justify-between items-center'>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleMarkCompleted}>Continue</AlertDialogAction>
+              </div>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {cancelAppointmentDialog && (
+        <AlertDialog
+          open={cancelAppointmentDialog}
+          onOpenChange={setCancelAppointmentDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will cancel the appointment.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <div className='w-full flex justify-between items-center'>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction variant='destructive' onClick={handleCancelAppointment}>Continue</AlertDialogAction>
+              </div>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </>
   )
